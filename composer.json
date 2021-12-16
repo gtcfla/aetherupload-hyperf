@@ -1,11 +1,11 @@
 {
-    "name": "zen/aetherupload-hyperf",
+    "name": "gtcfla/aetherupload-hyperf",
     "description": "Hyperf Package for uploading big files",
     "type": "library",
     "license": "GPL-2.0",
     "authors": [
         {
-            "name": "zen",
+            "name": "gtcfla",
             "email": "gtcfla@gmail.com"
         }
     ],
@@ -15,7 +15,7 @@
     },
     "autoload":{
         "psr-4":{
-            "Zen\\AetherUpload\\": "./src/"
+            "Gtcfla\\AetherUpload\\": "./src/"
         }
     }
 }

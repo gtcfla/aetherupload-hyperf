@@ -1,5 +1,5 @@
 <?php
-namespace Zen\AetherUpload;
+namespace Gtcfla\AetherUpload;
 
 abstract class BaseUploader
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Zen\AetherUpload;
+namespace Gtcfla\AetherUpload;
 
 use Hyperf\HttpServer\Contract\RequestInterface;
 use Hyperf\HttpServer\Contract\ResponseInterface;

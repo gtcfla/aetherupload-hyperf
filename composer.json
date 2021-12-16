@@ -1,0 +1,21 @@
+{
+    "name": "zen/aetherupload-hyperf",
+    "description": "Hyperf Package for uploading big files",
+    "type": "library",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "zen",
+            "email": "gtcfla@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+	"php": ">=7.4"
+    },
+    "autoload":{
+        "psr-4":{
+            "Zen\\AetherUpload\\": "./src/"
+        }
+    }
+}

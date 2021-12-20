@@ -6,19 +6,8 @@ use Hyperf\HttpServer\Contract\ResponseInterface;
 
 class Uploader extends BaseUploader
 {
-     /**
-     * @Inject
-     * @var RequestInterface
-     */
     protected $request;
-
-
-    /**
-     * @Inject
-     * @var ResponseInterface
-     */
     protected $response;
-
     protected $result;
     protected $uploadHead;
     protected $uploadFilePartial;
@@ -26,11 +15,26 @@ class Uploader extends BaseUploader
     static protected $UPLOAD_HEAD_DIR;
     static protected $UPLOAD_PATH;
 
-    public function __construct()
+    public function __construct(RequestInterface $request, ResponseInterface $response)
     {
+        $this->request = $request;
+        $this->response = $response;
         self::$UPLOAD_PATH = config('aetherupload.UPLOAD_PATH');
         self::$UPLOAD_FILE_DIR = config('aetherupload.UPLOAD_FILE_DIR');
         self::$UPLOAD_HEAD_DIR = config('aetherupload.UPLOAD_HEAD_DIR');
+        if(!file_exists(self::$UPLOAD_PATH))
+        {
+            mkdir(self::$UPLOAD_PATH, 0777, true);
+            chmod(self::$UPLOAD_PATH, 0777);
+        }
+        if(!file_exists(self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR))
+        {
+            mkdir(self::$UPLOAD_PATH.self::$UPLOAD_FILE_DIR, 0777, true);
+        }
+        if(!file_exists(self::$UPLOAD_PATH.self::$UPLOAD_HEAD_DIR))
+        {
+            mkdir(self::$UPLOAD_PATH.self::$UPLOAD_HEAD_DIR, 0777, true);
+        }
     }
 
     /**
@@ -39,11 +43,10 @@ class Uploader extends BaseUploader
      */
     public function init()
     {
-        $fileName = $request->input('file_name',0);
+        $fileName = $this->request->input('file_name',0);
 
-        $fileSize = $request->input('file_size',0);
-
-        $this->result = [ 
+        $fileSize = $this->request->input('file_size',0);
+        $this->result = [
             'error' => 0,
             'chunkSize' => config('aetherupload.CHUNK_SIZE'),
             'uploadBasename' => '',
@@ -79,7 +82,7 @@ class Uploader extends BaseUploader
 
         $this->uploadHead = $this->getUploadHeadPath($uploadBasename);
 
-        if(!( @touch($this->uploadFilePartial) && @touch($this->uploadHead)))
+        if(!( touch($this->uploadFilePartial) && touch($this->uploadHead)))
         {
             return $this->reportError('Fail to create file.');
         }
@@ -99,15 +102,15 @@ class Uploader extends BaseUploader
     public function save()
     {
 
-        $chunkTotalCount = $request->input('chunk_total',0);# 分片总数
+        $chunkTotalCount = $this->request->input('chunk_total',0);# 分片总数
 
-        $chunkIndex = $request->input('chunk_index',0);# 当前分片号
+        $chunkIndex = $this->request->input('chunk_index',0);# 当前分片号
 
-        $uploadBasename = $request->input('upload_basename',0);# 文件重命名
+        $uploadBasename = $this->request->input('upload_basename',0);# 文件重命名
 
-        $uploadExt = $request->input('upload_ext',0);# 文件扩展名
+        $uploadExt = $this->request->input('upload_ext',0);# 文件扩展名
 
-        $file = $request->file('file');
+        $file = $this->request->file('file');
 
         $this->uploadHead = $this->getUploadHeadPath($uploadBasename);
 
@@ -169,8 +172,8 @@ class Uploader extends BaseUploader
                 return $this->reportError('Fail to rename file.',true);
             }
 
-			$this->result['uploadName'] = basename($uploadFile);
-			
+            $this->result['uploadName'] = basename($uploadFile);
+
             $this->result['complete'] = 1;
         }
 
@@ -188,7 +191,7 @@ class Uploader extends BaseUploader
 
         if(!is_file($uploadedFile)) abort(404);
 
-        return $response->download($uploadedFile,'', [],'inline');
+        return $this->response->download($uploadedFile,'', [],'inline');
 
     }
 
@@ -206,7 +209,7 @@ class Uploader extends BaseUploader
 
         $extension = explode('.',$resourceName)[1];
 
-        return $response->download($uploadedFile,$newName.'.'.$extension, [],'attachment');
+        return $this->response->download($uploadedFile,$newName.'.'.$extension, [],'attachment');
 
     }
 
@@ -273,19 +276,19 @@ class Uploader extends BaseUploader
     {
         if($deleteFiles) {
             @unlink($this->uploadHead);
-			
+
             @unlink($this->uploadFilePartial);
         }
 
         $this->result['error'] = 'Error:'.$message;
 
-        return $response->json($this->result);
+        return $this->response->json($this->result);
 
     }
 
     protected function returnResult()
     {
-        return $response->json($this->result);
+        return $this->response->json($this->result);
 
     }
 
